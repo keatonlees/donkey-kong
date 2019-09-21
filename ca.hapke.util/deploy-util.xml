@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project ca.hapke.net.udp with libraries in sub-folder">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="${dir.buildfile}/.."/>
+    <property name="dir.deploy" value="${dir.workspace}/ca.hapke.rpi.deploy"/>
+    <property name="dir.deploy.jars" value="${dir.deploy}/jars"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.deploy.jars}/ca.hapke.util.jar">
+            <fileset dir="${dir.buildfile}/bin"/>
+        </jar>
+    </target>
+</project>
