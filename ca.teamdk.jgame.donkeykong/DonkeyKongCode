@@ -1,0 +1,499 @@
+package ca.teamdk.jgame.donkeykong;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader.BlockAction;
+
+import ca.hapke.util.NumberUtil;
+import jgame.JGObject;
+import jgame.JGPoint;
+import jgame.JGTimer;
+import jgame.platform.StdGame;
+
+public class DonkeyKong extends StdGame {
+	public static void main(String[] args) {
+		new DonkeyKong(new JGPoint(672, 768));
+	}
+
+	public DonkeyKong(JGPoint size) {
+		initEngine(size.x, size.y);
+		initial_lives = 3;
+	}
+
+	@Override
+	public void initCanvas() {
+		setCanvasSettings(84, 96, 8, 8, null, null, null);
+	}
+
+	@Override
+	public void initGame() {
+		// BACKGROUNDS
+		int j = 8, num = 0;
+		defineImage(Background.TILE + "a", Background.TILE + "a", Background.COLLISION_ID, "background_active.png",
+				"-");
+		defineImage(Background.TILE, Background.TILE, Background.COLLISION_ID, "bg_scene1.png", "-");
+		for (int i = 0; i < 8; i++) {
+			num = (j - i);
+			defineImage(Background.TILE + num, Background.TILE + num, Background.COLLISION_ID,
+					"bg_scene" + num + ".png", "-");
+		}
+
+		// KONG SPRITES
+		defineImage(Kong.TILE, Kong.TILE, Kong.COLLISION_ID, "kong_climb1.png", "-");
+		defineImage(Kong.TILE + "2", Kong.TILE + "2", Kong.COLLISION_ID, "kong_climb2.png", "-");
+		defineImage(Kong.TILE + "s", Kong.TILE + "s", Kong.COLLISION_ID, "kong_stand.png", "-");
+		defineImage(Kong.TILE + "m", Kong.TILE + "m", Kong.COLLISION_ID, "kong_smile.png", "-");
+
+		defineImage(Kong.TILE + "t1", Kong.TILE + "t1", Kong.COLLISION_ID, "kong_barrel1.png", "-");
+		defineImage(Kong.TILE + "t2", Kong.TILE + "t2", Kong.COLLISION_ID, "kong_barrel2.png", "-");
+		defineImage(Kong.TILE + "t3", Kong.TILE + "t3", Kong.COLLISION_ID, "kong_barrel1.png", "x");
+
+		// JUMPMAN SPRITES
+		defineImage(JumpMan.TILE, JumpMan.TILE, JumpMan.COLLISION_ID, JumpMan.IMAGE_FILENAME, "x");
+		defineImage(JumpMan.TILE + "l", JumpMan.TILE + "l", JumpMan.COLLISION_ID, JumpMan.IMAGE_FILENAME, "-");
+		defineImage(JumpMan.TILE + "w", JumpMan.TILE + "w", JumpMan.COLLISION_ID, "jumpman_walk1.png", "x");
+		defineImage(JumpMan.TILE + "wl", JumpMan.TILE + "wl", JumpMan.COLLISION_ID, "jumpman_walk1.png", "-");
+		defineImage(JumpMan.TILE + "w2", JumpMan.TILE + "w2", JumpMan.COLLISION_ID, "jumpman_walk2.png", "x");
+		defineImage(JumpMan.TILE + "w2l", JumpMan.TILE + "w2l", JumpMan.COLLISION_ID, "jumpman_walk2.png", "-");
+
+		defineImage(JumpMan.TILE + "d", JumpMan.TILE + "d", JumpMan.COLLISION_ID, "jumpman_dead.png", "-");
+		defineImage(JumpMan.TILE + "d2", JumpMan.TILE + "d2", JumpMan.COLLISION_ID, "jumpman_dead.png", "r");
+		defineImage(JumpMan.TILE + "d3", JumpMan.TILE + "d3", JumpMan.COLLISION_ID, "jumpman_dead.png", "y");
+		defineImage(JumpMan.TILE + "d4", JumpMan.TILE + "d4", JumpMan.COLLISION_ID, "jumpman_dead.png", "s");
+
+		// JUMPMAN ANIMATIONS
+		defineAnimation("jar", rightWalk, 0.3);
+		defineAnimation("jal", leftWalk, 0.3);
+		defineAnimation("ded", deadSpin, 0.3);
+
+		// BARRELS
+		defineImage(Barrels.TILE, Barrels.TILE, Barrels.COLLISION_ID, Barrels.IMAGE_FILENAME, "-");
+		defineImage(Barrels.TILE + "2", Barrels.TILE + "2", Barrels.COLLISION_ID, Barrels.IMAGE_FILENAME, "x");
+		defineImage(Barrels.TILE + "3", Barrels.TILE + "3", Barrels.COLLISION_ID, Barrels.IMAGE_FILENAME, "y");
+		defineImage(Barrels.TILE + "4", Barrels.TILE + "4", Barrels.COLLISION_ID, Barrels.IMAGE_FILENAME, "z");
+		defineImage(Barrels.TILE + "s", Barrels.TILE + "s", Barrels.COLLISION_ID, "barrel_stack.png", "-");
+
+		defineImage(FireBarrel.TILE, FireBarrel.TILE, FireBarrel.COLLISION_ID, "oil1.png", "-");
+		defineImage(FireBarrel.TILE + "2", FireBarrel.TILE + "2", FireBarrel.COLLISION_ID, "oil2.png", "-");
+
+		// BARREL ANIMATIONS
+		defineAnimation("brr", rightRoll, 0.2);
+		defineAnimation("brl", leftRoll, 0.2);
+
+		// GIRDER BACKGROUNDS
+		defineImage(GirderBG.TILE, GirderBG.TILE, GirderBG.COLLISION_ID, GirderBG.IMAGE_FILENAME, "-");
+
+		// LADDER BACKGROUNDS
+		defineImage(LadderBG.TILE, LadderBG.TILE, LadderBG.COLLISION_ID, "ladder1.png", "-");
+		defineImage(LadderBG.TILE + "2", LadderBG.TILE + "2", LadderBG.COLLISION_ID, "ladder2.png", "-");
+		defineImage(LadderBG.TILE + "3", LadderBG.TILE + "3", LadderBG.COLLISION_ID, "ladder3.png", "-");
+		defineImage(LadderBG.TILE + "4", LadderBG.TILE + "4", LadderBG.COLLISION_ID, "ladder4.png", "-");
+		defineImage(LadderBG.TILE + "5", LadderBG.TILE + "5", LadderBG.COLLISION_ID, "ladder5.png", "-");
+		defineImage(LadderBG.TILE + "6", LadderBG.TILE + "6", LadderBG.COLLISION_ID, "ladder6.png", "-");
+		defineImage(LadderBG.TILE + "7", LadderBG.TILE + "7", LadderBG.COLLISION_ID, "ladder7.png", "-");
+		defineImage(LadderBG.TILE + "8", LadderBG.TILE + "8", LadderBG.COLLISION_ID, "ladder8.png", "-");
+		defineImage(LadderBG.TILE + "9", LadderBG.TILE + "9", LadderBG.COLLISION_ID, "ladder9.png", "-");
+		defineImage(LadderBG.TILE + "10", LadderBG.TILE + "10", LadderBG.COLLISION_ID, "ladder10.png", "-");
+		defineImage(LadderBG.TILE + "11", LadderBG.TILE + "11", LadderBG.COLLISION_ID, "ladder11.png", "-");
+		defineImage(LadderBG.TILE + "12", LadderBG.TILE + "12", LadderBG.COLLISION_ID, "ladder12.png", "-");
+		defineImage(LadderBG.TILE + "13", LadderBG.TILE + "13", LadderBG.COLLISION_ID, "ladder13.png", "-");
+		defineImage(LadderBG.TILE + "14", LadderBG.TILE + "14", LadderBG.COLLISION_ID, "ladder14.png", "-");
+	}
+
+	private JumpMan jumpman;
+	private Kong kong;
+	private Background background;
+	private GirderBG girder;
+	private LadderBG ladder;
+	private Barrels barrel;
+	private FireBarrel fireBarrel;
+
+	private String[] rightWalk = { "jw", "j", "jw2", "j" };
+	private String[] leftWalk = { "jwl", "jl", "jw2l", "jl" };
+	private String[] rightRoll = { "d", "d2", "d3", "d4" };
+	private String[] leftRoll = { "d4", "d3", "d2", "d" };
+	private String[] kongThrow = { "kt1", "kt2", "kt3" };
+	private String[] deadSpin = { "jd", "jd2", "jd3", "jd4" };
+
+	private Audio audio;
+
+	private int kongX = 0;
+	private int kongY = 594;
+	private int jumpY = 0;
+
+	private int jumpmanX = 0;
+	private int jumpmanY = 3;
+	private int delayCount = 0;
+	public int barrelCount = 0;
+
+	private int startingY = 700;
+
+	private boolean firstTime = true;
+	private boolean newLife = false;
+	public boolean upKeyPressed = false;
+
+	public boolean onLadder = false;
+	public boolean makeBarrel = true;
+	public boolean gameOver = false;
+	public boolean touchingGider = false;
+
+	public int checkCount = 0;
+
+	private ScreenState screenState = ScreenState.StartingAnim;
+	private KongState kongState = KongState.ClimbUp;
+	public JumpManState jumpManState = JumpManState.MakeMe;
+
+	@Override
+	public void initNewLife() {
+		if (firstTime) {
+			background = new Background(this, 0, 0);
+			kong = new Kong(this, 320, 594);
+			newLife = true;
+		} else if ((newLife) && (!firstTime)) {
+			System.out.println("New Life");
+			delayCount = 0;
+			barrelCount = 0;
+			gameOver = false;
+			makeBarrel = false;
+			screenState = ScreenState.GamePlay;
+			jumpManState = JumpManState.MakeMe;
+		}
+	}
+
+	@Override
+	public void doFrame() {
+		super.doFrame();
+
+		touchingGider = false;
+		onLadder = false;
+		
+		switch (screenState) {
+
+		// KONG CLMBING AND JUMP ANIMATION
+		case StartingAnim:
+			if (firstTime) {
+				if (kong != null) {
+					if (kongState == KongState.ClimbUp) {
+						kongClimb();
+					} else if ((kongState == KongState.JumpUp) || (kongState == KongState.FallDown)) {
+						kongJump();
+					}
+					if (kong.x == 55) {
+						delay();
+						if (delayCount == 15) {
+							delayCount = 0;
+							kong.setGraphic(null);
+							background.bgCount = 8;
+							screenState = ScreenState.GamePlay;
+						}
+
+					}
+				}
+			} else if ((!firstTime) && (newLife)) {
+				screenState = ScreenState.GamePlay;
+			}
+			break;
+
+		// GIVE PLAYER CONTROL OF JUMPMAN
+		case GamePlay:
+			if ((newLife) && (jumpManState == JumpManState.MakeMe)) {
+				delay();
+			}
+
+			if ((delayCount == 15) && (jumpManState == JumpManState.MakeMe)) {
+				// MAKE THE GIRDERS, JUMPMAN, LADDERS, AND KONG
+				setLadders();
+				setGirders();
+
+				background = new Background(this, 0, 0);
+				background.setGraphic(background.TILE + "a");
+
+				barrel = new Barrels(this, 0, 156);
+				barrel.setGraphic(barrel.TILE + "s");
+
+				fireBarrel = new FireBarrel(this, 50, 648);
+
+				jumpman = new JumpMan(this, 100, 680);
+				jumpManState = JumpManState.AllowJump;
+
+				if (!firstTime) {
+					kong = new Kong(this, 55, 123);
+					makeBarrel = true;
+				} else if (firstTime) {
+					kong.setGraphic(kong.TILE + "m");
+				}
+
+				newLife = false;
+			} else if (delayCount == 15) {
+				moveJumpMan();
+				moveBarrels();
+				gameIsOver();
+			}
+
+			break;
+		default:
+			break;
+		}
+
+		moveObjects();
+
+	}
+
+	private void moveJumpMan() {
+		if (jumpman != null) {
+			if (!jumpman.jumpmanDead) {
+
+				checkCollision(GirderBG.COLLISION_ID, JumpMan.COLLISION_ID);
+				checkCollision(LadderBG.COLLISION_ID, JumpMan.COLLISION_ID);
+				checkCollision(Barrels.COLLISION_ID, JumpMan.COLLISION_ID);
+				checkBGCollision(0, JumpMan.COLLISION_ID);
+
+				upDown();
+				leftRight();
+				
+//				if ((touchingGider) && (onLadder)) {
+//					upDown();
+//					leftRight();
+//				} else if ((!touchingGider) && (onLadder)) {
+//					upDown();
+//				} else if ((touchingGider) && (!onLadder)) {
+//					upDown();
+//					leftRight();
+//				} else if ((!touchingGider) && (!onLadder)) {
+//					jumpmanY = 4;
+//				}
+				
+				jumpman.xdir = jumpmanX;
+				jumpman.ydir = jumpmanY;
+			}
+		}
+	}
+
+	private void leftRight() {
+		if (getKey(key_left)) {
+			jumpmanX = -3;
+		} else if (getKey(key_right)) {
+			jumpmanX = 3;
+		} else {
+			jumpmanX = (int) NumberUtil.relax(jumpmanX, 0, 3);
+		}
+	}
+
+	private void upDown() {
+		if (getKey(32)) {
+			if (!upKeyPressed) {
+				upKeyPressed = true;
+				jumpmanY = -4;
+				startingY = (int) jumpman.y;
+			}
+		} else if (getKey(key_up) && (onLadder)) {
+			jumpmanY = -3;
+		} else if (getKey(key_down) && (onLadder)) {
+			jumpmanY = 3;
+		} else if (onLadder) {
+			jumpmanY = 0;
+		} else {
+			jumpmanY = 4;
+		}
+
+		if (startingY - 40 > jumpman.y) {
+			startingY = (int) jumpman.y;
+			jumpmanY = 4;
+		}
+	}
+
+	private void moveBarrels() {
+		checkCollision(GirderBG.COLLISION_ID, Barrels.COLLISION_ID);
+		checkCollision(FireBarrel.COLLISION_ID, Barrels.COLLISION_ID);
+
+		if (makeBarrel) {
+			barrel = new Barrels(this, 210, 220);
+			barrelCount++;
+			makeBarrel = false;
+			barrel.xdir = 4;
+			barrel.setAnim("brr");
+		}
+		barrel.ydir = 4;
+	}
+
+	private void gameIsOver() {
+		if (gameOver) {
+			background.setGraphic(null);
+
+			// jumpman
+			removeObjects(null, jumpman.COLLISION_ID);
+			// kong
+			removeObjects(null, kong.COLLISION_ID);
+			// girders
+			removeObjects(null, girder.COLLISION_ID);
+			// ladders
+			removeObjects(null, ladder.COLLISION_ID);
+			// barrels
+			removeObjects(null, barrel.COLLISION_ID);
+			removeObjects(null, fireBarrel.COLLISION_ID);
+
+			screenState = ScreenState.StartingAnim;
+
+			if (lives == 0) {
+				firstTime = true;
+			}
+
+			firstTime = false;
+			newLife = true;
+
+			lifeLost();
+		}
+	}
+
+	private void delay() {
+		long start = new Date().getTime();
+		while (new Date().getTime() - start < 200L) {
+		}
+		delayCount++;
+	}
+
+	private void kongClimb() {
+		// CLIMB ANIMATION
+		if (kongState == KongState.ClimbUp) {
+			if (kongY > 300) {
+				kong.y -= 3;
+			} else if (kongY > 50) {
+				kong.y -= 10;
+			}
+			if (kongY < 123) {
+				kong.y += 3;
+				kongState = KongState.JumpUp;
+			}
+		}
+		kongY = (int) kong.y;
+	}
+
+	private void kongJump() {
+		// JUMP ANIMATION
+		if (background.bgCount < 7) {
+			if (kongState == KongState.JumpUp) {
+				kong.y -= 5;
+				if (kong.y < 80) {
+					kongState = KongState.FallDown;
+				}
+			} else if (kongState == KongState.FallDown) {
+				kong.y += 5;
+			}
+
+			kong.x -= 2.5;
+
+			if (kong.y == 123) {
+				kongState = KongState.StandStill;
+				background.bgCount++;
+				kongState = KongState.JumpUp;
+			}
+		}
+	}
+
+	private void setLadders() {
+		// MAKE THE LADDERS
+		ladder = new LadderBG(this, 552, 681);
+		ladder.setGraphic(ladder.TILE + "2");
+		ladder = new LadderBG(this, 288, 570);
+		ladder.setGraphic(ladder.TILE + "3");
+		ladder = new LadderBG(this, 96, 582);
+		ladder.setGraphic(ladder.TILE + "4");
+		ladder = new LadderBG(this, 336, 471);
+		ladder.setGraphic(ladder.TILE + "6");
+		ladder = new LadderBG(this, 552, 483);
+		ladder.setGraphic(ladder.TILE + "7");
+		ladder = new LadderBG(this, 216, 378);
+		ladder.setGraphic(ladder.TILE + "9");
+		ladder = new LadderBG(this, 96, 384);
+		ladder.setGraphic(ladder.TILE + "10");
+		ladder = new LadderBG(this, 552, 285);
+		ladder.setGraphic(ladder.TILE + "12");
+	}
+
+	private void setGirders() {
+		int girderX = 0;
+		int girderY = 744;
+		int startGX = 0;
+		int startGY = 0;
+		int girderXadd = 48;
+		int i = 0;
+		int j = 0;
+
+		while (i < 14) {
+			girder = new GirderBG(this, girderX, girderY);
+			girderX += 48;
+			if (i > 5) {
+				girderY -= 3;
+			}
+			i++;
+		}
+
+		i = 0;
+		girderX = 576;
+		girderY = 660;
+		while (i < 13) {
+			girder = new GirderBG(this, girderX, girderY);
+			girderX += -48;
+			girderY += -3;
+
+			i++;
+		}
+
+		i = 0;
+		girderX = 48;
+		girderY = 561;
+		while (i < 13) {
+			girder = new GirderBG(this, girderX, girderY);
+			girderX += 48;
+			girderY += -3;
+
+			i++;
+		}
+
+		i = 0;
+		girderX = 576;
+		girderY = 462;
+		while (i < 13) {
+			girder = new GirderBG(this, girderX, girderY);
+			girderX += -48;
+			girderY += -3;
+
+			i++;
+		}
+
+		i = 0;
+		girderX = 48;
+		girderY = 363;
+		while (i < 13) {
+			girder = new GirderBG(this, girderX, girderY);
+			girderX += 48;
+			girderY += -3;
+
+			i++;
+		}
+
+		i = 0;
+		girderX = 576;
+		girderY = 264;
+		while (i < 14) {
+			girder = new GirderBG(this, girderX, girderY);
+			girderX += -48;
+			if (i < 4) {
+				girderY -= 3;
+			}
+			i++;
+		}
+
+		i = 0;
+		girderX = 264;
+		girderY = 168;
+		while (i < 3) {
+			girder = new GirderBG(this, girderX, girderY);
+			girderX += 48;
+
+			i++;
+		}
+	}
+
+}

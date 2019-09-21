@@ -1,0 +1,77 @@
+package ca.teamdk.jgame.donkeykong;
+
+import javax.jws.Oneway;
+
+import ca.hapke.util.NumberUtil;
+import jgame.JGObject;
+
+public class JumpMan extends JGObject {
+
+	public static final int COLLISION_ID = 2;
+	public static final String NAME = "zjumpman";
+	public static final String TILE = "j";
+	public static final String IMAGE_FILENAME = "jumpman_stand.png";
+	public static int SPEED = 0;
+	private DonkeyKong game;
+	private Barrels barrel;
+	public boolean stopWalk = true;
+	public boolean jumpmanDead = false;
+	private int deadCount = 0;
+
+	public JumpMan(DonkeyKong game, int x, int y) {
+		super(NAME, true, x, y, COLLISION_ID, TILE, SPEED, SPEED, 1d, 1d, -1);
+		setBBox(22, 35, 7, 15);
+		this.game = game;
+	}
+
+	@Override
+	public void move() {
+		super.move();
+		if (jumpmanDead) {
+
+			ydir = 0;
+			xdir = 0;
+			setAnim("ded");
+			deadCount++;
+			if (deadCount > 100) {
+				game.gameOver = true;
+			} else if (deadCount > 25) {
+				stopAnim();
+				setGraphic(TILE + "d4");
+			}
+		} else if (!jumpmanDead) {
+			if (game.onLadder) {
+				setAnim("jac");
+			} else if ((xdir > 0) && (!game.onLadder)) {
+				setAnim("jar");
+				stopWalk = true;
+			} else if ((xdir < 0) && (!game.onLadder)) {
+				setAnim("jal");
+				stopWalk = false;
+			} else {
+				if (stopWalk) {
+					setGraphic(TILE);
+				} else {
+					setGraphic(TILE + "l");
+				}
+			}
+			x = NumberUtil.limit(x, 0, game.viewWidth() - 51);
+		}
+	}
+
+	@Override
+	public void hit(JGObject obj) {
+		if (and(obj.colid, GirderBG.COLLISION_ID)) {
+			y -= 4;
+			game.upKeyPressed = false;
+			game.onLadder = false;
+			game.touchingGider = true;
+			game.checkCount++;
+		} else if (and(obj.colid, LadderBG.COLLISION_ID)) {
+			game.onLadder = true;
+			game.checkCount++;
+		} else if (and(obj.colid, Barrels.COLLISION_ID)) {
+			jumpmanDead = true;
+		}
+	}
+}
