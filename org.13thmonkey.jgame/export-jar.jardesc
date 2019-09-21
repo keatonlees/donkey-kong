@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
+<jardesc>
+    <jar path="org.13thmonkey.jgame/export/org.13thmonkey.jgame.jar"/>
+    <options buildIfNeeded="true" compress="false" descriptionLocation="/org.13thmonkey.jgame/export-jar.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" manifestLocation="/org.13thmonkey.jgame/Export-MANIFEST.MF" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <javaElement handleIdentifier="=org.13thmonkey.jgame/src-jre"/>
+        <javaElement handleIdentifier="=org.13thmonkey.jgame/src-base"/>
+    </selectedElements>
+</jardesc>
